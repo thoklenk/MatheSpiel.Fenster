@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Zahlenaufgabe</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+}
+
+.container{
+display:flex;
+gap:60px;
+}
+
+.column{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.row{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+input{
+width:70px;
+padding:5px;
+font-size:16px;
+}
+
+.correct{
+background:#8cff8c;
+}
+
+.wrong{
+background:#ff8c8c;
+}
+
+.skip{
+background:#ff8c8c;
+}
+
+.rounded{
+margin-left:10px;
+font-weight:bold;
+}
+
+.failCount{
+color:red;
+font-weight:bold;
+margin-left:5px;
+}
+
+.skipX{
+color:red;
+font-weight:bold;
+margin-left:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Aufgaben</h2>
+
+<div class="container">
+<div class="column" id="col1"></div>
+<div class="column" id="col2"></div>
+</div>
+
+<script>
+
+// Lösungen (Dezimalzahlen erlaubt)
+const solutions = [
+[4.2,5.7,3.1,8.6,7.3,9.9,2.4,6.8,1.2,4.5],
+[2.5,7.4,6.6,3.3,8.1,5.5,9.2,4.4,1.7,6.9]
+];
+
+let attempts=[
+new Array(10).fill(0),
+new Array(10).fill(0)
+];
+
+let current=[0,0];
+
+function createInputs(){
+
+for(let c=0;c<2;c++){
+
+let column=document.getElementById("col"+(c+1));
+
+for(let i=0;i<10;i++){
+
+let row=document.createElement("div");
+row.className="row";
+
+let label=document.createElement("span");
+label.innerText=(i+1)+".";
+
+let input=document.createElement("input");
+input.type="number";
+input.step="any";
+
+input.dataset.col=c;
+input.dataset.row=i;
+
+if(i!==0) input.disabled=true;
+
+input.addEventListener("keydown",function(e){
+if(e.key==="Enter") check(this);
+});
+
+let rounded=document.createElement("span");
+rounded.className="rounded";
+
+let fail=document.createElement("span");
+fail.className="failCount";
+
+let skip=document.createElement("span");
+skip.className="skipX";
+
+row.appendChild(label);
+row.appendChild(input);
+row.appendChild(rounded);
+row.appendChild(fail);
+row.appendChild(skip);
+
+column.appendChild(row);
+
+}
+}
+}
+
+function check(input){
+
+let col=parseInt(input.dataset.col);
+let row=parseInt(input.dataset.row);
+
+let value=parseFloat(input.value);
+let solution=solutions[col][row];
+
+if(row!==current[col]) return;
+
+let failDisplay=input.parentElement.querySelector(".failCount");
+
+if(Math.abs(value-solution)<0.001){
+
+input.classList.add("correct");
+input.disabled=true;
+
+let rounded=Math.round(solution);
+let roundedDisplay=input.parentElement.querySelector(".rounded");
+
+roundedDisplay.innerText="→ "+rounded;
+failDisplay.innerText="";
+
+current[col]++;
+enableNext(col);
+
+}else{
+
+attempts[col][row]++;
+
+input.classList.add("wrong");
+
+failDisplay.innerText=attempts[col][row];
+
+if(attempts[col][row]>=3){
+
+input.classList.remove("wrong");
+input.classList.add("skip");
+input.disabled=true;
+
+let skip=input.parentElement.querySelector(".skipX");
+skip.innerText="X";
+
+failDisplay.innerText="";
+
+current[col]++;
+enableNext(col);
+
+}
+
+}
+}
+
+function enableNext(col){
+
+let next=current[col];
+
+if(next<10){
+
+let inputs=document.querySelectorAll(`input[data-col='${col}']`);
+inputs[next].disabled=false;
+inputs[next].focus();
+
+}
+
+}
+
+createInputs();
+
+</script>
+
+</body>
+</html>
